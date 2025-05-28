@@ -23,21 +23,25 @@ class MainActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             val userInput = inputText.text.toString()
-            sendToChatGPT(userInput) { response ->
-                runOnUiThread {
-                    responseText.text = response
+            if (userInput.isNotEmpty()) {
+                sendToChatGPT(userInput) { response ->
+                    runOnUiThread {
+                        responseText.text = response
+                    }
                 }
             }
         }
     }
 
     private fun sendToChatGPT(prompt: String, callback: (String) -> Unit) {
-        val apiKey = "YOUR_OPENAI_API_KEY"
+        val apiKey = "YOUR_OPENAI_API_KEY" // Replace with your actual OpenAI API key
         val mediaType = "application/json; charset=utf-8".toMediaType()
-        val body = RequestBody.create(mediaType, """{
-          "model": "gpt-3.5-turbo",
-          "messages": [{"role": "user", "content": "$prompt"}]
-        }""")
+        val body = RequestBody.create(mediaType, """
+          {
+            "model": "gpt-3.5-turbo",
+            "messages": [{"role": "user", "content": "$prompt"}]
+          }
+        """)
 
         val request = Request.Builder()
             .url("https://api.openai.com/v1/chat/completions")
@@ -48,20 +52,20 @@ class MainActivity : AppCompatActivity() {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback("Request failed: " + e.message)
+                callback("Error: ${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
-                    if (!it.isSuccessful) {
-                        callback("Unexpected code: ${response.code}")
+                    if (!response.isSuccessful) {
+                        callback("Failed: ${response.code}")
                     } else {
-                        val json = JSONObject(it.body?.string())
-                        val result = json.getJSONArray("choices")
+                        val json = JSONObject(response.body?.string() ?: "")
+                        val content = json.getJSONArray("choices")
                             .getJSONObject(0)
                             .getJSONObject("message")
                             .getString("content")
-                        callback(result)
+                        callback(content)
                     }
                 }
             }
