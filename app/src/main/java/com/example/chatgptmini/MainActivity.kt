@@ -23,18 +23,16 @@ class MainActivity : AppCompatActivity() {
 
         sendButton.setOnClickListener {
             val userInput = inputText.text.toString()
-            if (userInput.isNotEmpty()) {
-                sendToChatGPT(userInput) { response ->
-                    runOnUiThread {
-                        responseText.text = response
-                    }
+            sendToChatGPT(userInput) { response ->
+                runOnUiThread {
+                    responseText.text = response
                 }
             }
         }
     }
 
     private fun sendToChatGPT(prompt: String, callback: (String) -> Unit) {
-        val apiKey = "YOUR_OPENAI_API_KEY" // Replace with your actual OpenAI API key
+        val apiKey = BuildConfig.OPENAI_API_KEY // Use BuildConfig to access the key
         val mediaType = "application/json; charset=utf-8".toMediaType()
         val body = RequestBody.create(mediaType, """
           {
@@ -52,13 +50,13 @@ class MainActivity : AppCompatActivity() {
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback("Error: ${e.message}")
+                callback("Error: " + e.message)
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     if (!response.isSuccessful) {
-                        callback("Failed: ${response.code}")
+                        callback("Failed: " + response.code)
                     } else {
                         val json = JSONObject(response.body?.string() ?: "")
                         val content = json.getJSONArray("choices")
