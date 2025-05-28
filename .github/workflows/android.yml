@@ -19,11 +19,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: List project files
-        run: ls -R
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
+
+      - name: Clean build
+        run: ./gradlew clean
 
       - name: Build APK with detailed output
         run: ./gradlew assembleDebug --stacktrace --info
@@ -33,13 +36,13 @@ jobs:
       - name: List build directory contents
         run: |
           echo "Listing app/build/ contents:"
-          ls -R app/build/ || echo "No build directory found"
-          echo "Listing app/build/outputs/ contents:"
-          ls -R app/build/outputs/ || echo "No outputs directory found"
+          find app/build/ -type f || echo "No files found in app/build/"
+          echo "Searching for any APK files:"
+          find . -name "*.apk" || echo "No APK files found"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.3.1
         if: success()
         with:
           name: app-debug.apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/*.apk
