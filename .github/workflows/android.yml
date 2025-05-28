@@ -29,16 +29,27 @@ jobs:
         run: ./gradlew clean
 
       - name: Build APK with detailed output
-        run: ./gradlew assembleDebug --stacktrace --info
+        run: ./gradlew assembleDebug --stacktrace --info > build.log 2>&1
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: List build directory contents
+      - name: Upload build log
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: build-log
+          path: build.log
+
+      - name: List all directories and files
         run: |
-          echo "Listing app/build/ contents:"
-          find app/build/ -type f || echo "No files found in app/build/"
+          echo "Listing all directories:"
+          find . -type d
+          echo "Listing all files:"
+          find . -type f
+
+      - name: Search for APK files
+        run: |
           echo "Searching for any APK files:"
-          find . -name "*.apk" || echo "No APK files found"
+          find . -name "*.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.3.1
