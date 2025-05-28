@@ -19,17 +19,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: List project files
+        run: ls -R
+
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build APK
-        run: ./gradlew assembleDebug
+      - name: Build APK with detailed output
+        run: ./gradlew assembleDebug --stacktrace --info
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: List build outputs
-        run: ls -R app/build/outputs/
+        run: ls -R app/build/outputs/ || echo "No outputs directory found"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.3.1
+        if: success()
         with:
           name: app-debug.apk
           path: app/build/outputs/apk/debug/app-debug.apk
