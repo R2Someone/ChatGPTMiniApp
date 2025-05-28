@@ -30,8 +30,12 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: List build outputs
-        run: ls -R app/build/outputs/ || echo "No outputs directory found"
+      - name: List build directory contents
+        run: |
+          echo "Listing app/build/ contents:"
+          ls -R app/build/ || echo "No build directory found"
+          echo "Listing app/build/outputs/ contents:"
+          ls -R app/build/outputs/ || echo "No outputs directory found"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4.3.1
