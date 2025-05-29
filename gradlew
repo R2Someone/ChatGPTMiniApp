@@ -1,2 +1,2 @@
 #!/bin/bash
-echo Running Gradle Wrapper
+echo 'Running Gradle Wrapper...'

@@ -1,72 +1,14 @@
 package com.example.chatgptmini
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import okhttp3.*
-import org.json.JSONObject
-import java.io.IOException
-import okhttp3.MediaType.Companion.toMediaType
 
 class MainActivity : AppCompatActivity() {
-    private val client = OkHttpClient()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        val inputText = findViewById<EditText>(R.id.inputText)
-        val sendButton = findViewById<Button>(R.id.sendButton)
-        val responseText = findViewById<TextView>(R.id.responseText)
-
-        sendButton.setOnClickListener {
-            val userInput = inputText.text.toString()
-            sendToChatGPT(userInput) { response ->
-                runOnUiThread {
-                    responseText.text = response
-                }
-            }
-        }
-    }
-
-    private fun sendToChatGPT(prompt: String, callback: (String) -> Unit) {
-        val apiKey = BuildConfig.OPENAI_API_KEY // Use BuildConfig to access the key
-        val mediaType = "application/json; charset=utf-8".toMediaType()
-        val body = RequestBody.create(mediaType, """
-          {
-            "model": "gpt-3.5-turbo",
-            "messages": [{"role": "user", "content": "$prompt"}]
-          }
-        """)
-
-        val request = Request.Builder()
-            .url("https://api.openai.com/v1/chat/completions")
-            .post(body)
-            .addHeader("Authorization", "Bearer $apiKey")
-            .addHeader("Content-Type", "application/json")
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                callback("Error: " + e.message)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) {
-                        callback("Failed: " + response.code)
-                    } else {
-                        val json = JSONObject(response.body?.string() ?: "")
-                        val content = json.getJSONArray("choices")
-                            .getJSONObject(0)
-                            .getJSONObject("message")
-                            .getString("content")
-                        callback(content)
-                    }
-                }
-            }
-        })
+        val responseView: TextView = findViewById(R.id.responseText)
+        responseView.text = "Welcome to ChatGPT Mini App!"
     }
 }
