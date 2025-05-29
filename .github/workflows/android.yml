@@ -19,13 +19,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v2
-
-      - name: Install Android SDK and Build Tools
-        run: |
-          echo y | sdkmanager "platforms;android-34"
-          echo y | sdkmanager "build-tools;34.0.0"
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -33,27 +28,14 @@ jobs:
       - name: Clean build
         run: ./gradlew clean
 
-      - name: Build APK with detailed output
-        run: ./gradlew assembleDebug --stacktrace --info > build.log 2>&1
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - name: Build APK
+        run: ./gradlew assembleDebug
 
-      - name: Upload build log
-        uses: actions/upload-artifact@v4.3.1
-        with:
-          name: build-log
-          path: build.log
-
-      - name: List build directory contents
-        run: |
-          echo "Listing app/build/ contents:"
-          find app/build/ -type f || echo "No files found in app/build/"
-          echo "Searching for any APK files:"
-          find . -name "*.apk" || echo "No APK files found"
+      - name: List APK files
+        run: find . -name "*.apk"
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4.3.1
-        if: success()
+        uses: actions/upload-artifact@v4
         with:
-          name: app-debug.apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
